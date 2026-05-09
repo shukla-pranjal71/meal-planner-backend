@@ -14,12 +14,24 @@ export const generateMeals = async (flatId) => {
   // 2. Get all recipes
   const recipes = await prisma.recipe.findMany();
 
+  const recentMeals = await prisma.mealHistory.findMany({
+    where: { flatId },
+    orderBy: { date: "desc" },
+    take: 3,
+  });
+
+  const recentRecipeIds = recentMeals.map((m) => m.recipeId);
+
   // 3. Filter recipes that can be made
-  const validRecipes = recipes.filter((recipe) =>
-    recipe.ingredientsRequired.every((ingredient) =>
+  const validRecipes = recipes.filter((recipe) => {
+    const hasIngredients = recipe.ingredientsRequired.every((ingredient) =>
       availableIngredients.includes(ingredient),
-    ),
-  );
+    );
+
+    const notRecentlyUsed = !recentRecipeIds.includes(recipe.id);
+
+    return hasIngredients && notRecentlyUsed;
+  });
 
   // 4. Simple scoring (use LOW quantity first later)
   const scored = validRecipes.map((recipe) => {
