@@ -40,10 +40,14 @@ export const generateMeals = async (flatId) => {
     recipe.ingredientsRequired.forEach((ingredient) => {
       const item = groceries.find((g) => g.ingredientName === ingredient);
 
-      if (item?.quantityLevel === "LOW") score += 2;
-      else if (item?.quantityLevel === "MEDIUM") score += 1;
+      if (item?.quantityLevel === "LOW") score += 3;
+      else if (item?.quantityLevel === "MEDIUM") score += 2;
+      else score += 1;
     });
 
+    if (recentRecipeIds.includes(recipe.id)) {
+      score -= 5;
+    }
     return { recipe, score };
   });
 
