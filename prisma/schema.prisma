@@ -35,6 +35,15 @@ model Grocery {
   @@unique([flatId, ingredientName])
 }
 
+model Recipe {
+  id        String   @id @default(uuid())
+  name      String
+  type      String   // veg / non-veg
+  ingredientsRequired String[]
+  ingredientsOptional String[]
+  createdAt DateTime @default(now())
+}
+
 enum QuantityLevel {
   LOW
   MEDIUM
