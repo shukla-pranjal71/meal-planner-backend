@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  flat      Flat?
+  createdAt DateTime @default(now())
+}
+
+model Flat {
+  id        String   @id @default(uuid())
+  name      String
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  groceries Grocery[]
+}
+
+model Grocery {
+  id             String   @id @default(uuid())
+  flatId         String
+  ingredientName String
+  quantityLevel  QuantityLevel
+  isAvailable    Boolean  @default(true)
+
+  flat Flat @relation(fields: [flatId], references: [id])
+
+  @@unique([flatId, ingredientName])
+}
+
+enum QuantityLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
