@@ -22,7 +22,7 @@ export const generateMeals = async (flatId) => {
   });
 
   const recentRecipeIds = recentMeals.map((m) => m.recipeId);
-
+  console.log("Recent recipe IDs:", recentRecipeIds);
   // 4. Filter recipes (must have ingredients)
   const validRecipes = recipes.filter((recipe) =>
     recipe.ingredientsRequired.every((ingredient) =>

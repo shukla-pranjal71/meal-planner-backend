@@ -1,5 +1,8 @@
 import express from "express";
-import { getMealsHandler } from "../controllers/meal.controller.js";
+import {
+  getMealsHandler,
+  markCookedHandler,
+} from "../controllers/meal.controller.js";
 
 const router = express.Router();
 

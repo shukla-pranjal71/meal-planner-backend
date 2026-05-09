@@ -1,4 +1,4 @@
-import { generateMeals } from "../services/meal.service.js";
+import { generateMeals, markMealCooked } from "../services/meal.service.js";
 
 export const getMealsHandler = async (req, res) => {
   try {
@@ -13,6 +13,7 @@ export const getMealsHandler = async (req, res) => {
 export const markCookedHandler = async (req, res) => {
   try {
     const { flatId, recipeId } = req.body;
+    console.log("Incoming:", flatId, recipeId);
     const result = await markMealCooked(flatId, recipeId);
     res.json(result);
   } catch (err) {
