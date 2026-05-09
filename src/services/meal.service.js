@@ -46,3 +46,12 @@ export const generateMeals = async (flatId) => {
     options: top.map((r) => r.recipe),
   };
 };
+
+export const markMealCooked = async (flatId, recipeId) => {
+  return prisma.mealHistory.create({
+    data: {
+      flatId,
+      recipeId,
+    },
+  });
+};
