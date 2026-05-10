@@ -2,6 +2,7 @@ import {
   generateMeals,
   markMealCooked,
   getAlmostRecipes,
+  generateWeeklyPlan,
 } from "../services/meal.service.js";
 
 export const getMealsHandler = async (req, res) => {
@@ -30,6 +31,16 @@ export const getAlmostRecipesHandler = async (req, res) => {
     const { flatId } = req.query;
     const data = await getAlmostRecipes(flatId);
     res.json(data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+export const getWeeklyPlanHandler = async (req, res) => {
+  try {
+    const { flatId } = req.query;
+    const plan = await generateWeeklyPlan(flatId);
+    res.json(plan);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

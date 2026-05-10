@@ -142,3 +142,73 @@ export const getAlmostRecipes = async (flatId) => {
 
   return suggestions.slice(0, 5);
 };
+
+export const generateWeeklyPlan = async (flatId) => {
+  // 1. Get groceries
+  const groceries = await prisma.grocery.findMany({
+    where: {
+      flatId,
+      isAvailable: true,
+    },
+  });
+
+  const availableIngredients = groceries.map((g) => g.ingredientName);
+
+  // 2. Get recipes
+  const recipes = await prisma.recipe.findMany();
+
+  // 3. Filter valid recipes
+  const validRecipes = recipes.filter((recipe) =>
+    recipe.ingredientsRequired.every((ingredient) =>
+      availableIngredients.includes(ingredient),
+    ),
+  );
+
+  // 4. Score recipes (same logic as meal engine)
+  const scored = validRecipes.map((recipe) => {
+    let score = 0;
+
+    recipe.ingredientsRequired.forEach((ingredient) => {
+      const item = groceries.find((g) => g.ingredientName === ingredient);
+
+      if (item?.quantityLevel === "LOW") score += 3;
+      else if (item?.quantityLevel === "MEDIUM") score += 2;
+      else score += 1;
+    });
+
+    return { recipe, score };
+  });
+
+  // 5. Sort
+  scored.sort((a, b) => b.score - a.score);
+
+  // 6. Build weekly plan (no repetition)
+  const weekDays = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+
+  const used = new Set();
+  const plan = [];
+
+  for (let i = 0; i < weekDays.length; i++) {
+    const recipe = scored.find((r) => !used.has(r.recipe.id));
+
+    if (!recipe) break;
+
+    used.add(recipe.recipe.id);
+
+    plan.push({
+      day: weekDays[i],
+      meal: recipe.recipe.name,
+      recipeId: recipe.recipe.id,
+    });
+  }
+
+  return plan;
+};
