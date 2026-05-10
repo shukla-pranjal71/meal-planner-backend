@@ -24,11 +24,12 @@ model Flat {
 }
 
 model Grocery {
-  id             String        @id @default(uuid())
+  id             String   @id @default(uuid())
   flatId         String
   ingredientName String
   quantityLevel  QuantityLevel
-  isAvailable    Boolean       @default(true)
+  isAvailable    Boolean  @default(true)
+  lastUsedAt     DateTime?
 
   flat Flat @relation(fields: [flatId], references: [id])
 

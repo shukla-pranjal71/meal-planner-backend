@@ -66,10 +66,31 @@ export const generateMeals = async (flatId) => {
 };
 
 export const markMealCooked = async (flatId, recipeId) => {
-  return prisma.mealHistory.create({
+  // 1. Save meal history
+  const history = await prisma.mealHistory.create({
     data: {
       flatId,
       recipeId,
     },
   });
+
+  // 2. Get recipe ingredients
+  const recipe = await prisma.recipe.findUnique({
+    where: { id: recipeId },
+  });
+
+  // 3. Update groceries usage
+  for (const ingredient of recipe.ingredientsRequired) {
+    await prisma.grocery.updateMany({
+      where: {
+        flatId,
+        ingredientName: ingredient,
+      },
+      data: {
+        lastUsedAt: new Date(),
+      },
+    });
+  }
+
+  return history;
 };
