@@ -3,6 +3,7 @@ import cors from "cors";
 import userRoutes from "./routes/user.routes.js";
 import groceryRoutes from "./routes/grocery.routes.js";
 import mealRoutes from "./routes/meal.routes.js";
+import insightRoutes from "./routes/insight.routes.js";
 
 const app = express();
 
@@ -11,5 +12,6 @@ app.use(express.json());
 app.use("/user", userRoutes);
 app.use("/grocery", groceryRoutes);
 app.use("/meal", mealRoutes);
+app.use("/insight", insightRoutes);
 
 export default app;
