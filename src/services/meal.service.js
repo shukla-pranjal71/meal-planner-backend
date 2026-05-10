@@ -94,3 +94,37 @@ export const markMealCooked = async (flatId, recipeId) => {
 
   return history;
 };
+
+export const getAlmostRecipes = async (flatId) => {
+  // 1. Get groceries
+  const groceries = await prisma.grocery.findMany({
+    where: {
+      flatId,
+      isAvailable: true,
+    },
+  });
+
+  const availableIngredients = groceries.map((g) => g.ingredientName);
+  console.log("availableIngredients: ", availableIngredients);
+  // 2. Get recipes
+  const recipes = await prisma.recipe.findMany();
+
+  const suggestions = [];
+
+  for (const recipe of recipes) {
+    const missingIngredients = recipe.ingredientsRequired.filter(
+      (ingredient) => !availableIngredients.includes(ingredient),
+    );
+    console.log("missingIngredients: ", missingIngredients);
+
+    // Only suggest if 1 or 2 ingredients missing
+    if (missingIngredients.length > 0 && missingIngredients.length <= 2) {
+      suggestions.push({
+        recipe,
+        missingIngredients,
+      });
+    }
+  }
+
+  return suggestions.slice(0, 5);
+};
