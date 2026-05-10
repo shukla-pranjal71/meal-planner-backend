@@ -22,7 +22,7 @@ export const generateMeals = async (flatId) => {
   });
 
   const recentRecipeIds = recentMeals.map((m) => m.recipeId);
-  console.log("Recent recipe IDs:", recentRecipeIds);
+
   // 4. Filter recipes (must have ingredients)
   const validRecipes = recipes.filter((recipe) =>
     recipe.ingredientsRequired.every((ingredient) =>
@@ -105,7 +105,7 @@ export const getAlmostRecipes = async (flatId) => {
   });
 
   const availableIngredients = groceries.map((g) => g.ingredientName);
-  console.log("availableIngredients: ", availableIngredients);
+
   // 2. Get recipes
   const recipes = await prisma.recipe.findMany();
 
@@ -115,9 +115,7 @@ export const getAlmostRecipes = async (flatId) => {
     const missingIngredients = recipe.ingredientsRequired.filter(
       (ingredient) => !availableIngredients.includes(ingredient),
     );
-    console.log("missingIngredients: ", missingIngredients);
 
-    // Only suggest if 1 or 2 ingredients missing
     if (missingIngredients.length > 0 && missingIngredients.length <= 2) {
       suggestions.push({
         recipe,
@@ -125,6 +123,22 @@ export const getAlmostRecipes = async (flatId) => {
       });
     }
   }
+
+  // 🔥 SORTING LOGIC (important part)
+  suggestions.sort((a, b) => {
+    // 1. Fewer missing ingredients first
+    if (a.missingIngredients.length !== b.missingIngredients.length) {
+      return a.missingIngredients.length - b.missingIngredients.length;
+    }
+
+    // 2. Tie-breaker: more matched ingredients first
+    const aMatched =
+      a.recipe.ingredientsRequired.length - a.missingIngredients.length;
+    const bMatched =
+      b.recipe.ingredientsRequired.length - b.missingIngredients.length;
+
+    return bMatched - aMatched;
+  });
 
   return suggestions.slice(0, 5);
 };
